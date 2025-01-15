@@ -63,7 +63,7 @@ if __name__ == "__main__":
     # Step 7: Training (Optional)
     print_separator()
     # print(f"[INFO] Starting training from epoch {epoch} for 10 epochs...")
-    epoch = train_model(model, trainloader, optimizer, criterion, scheduler, device, start_epoch=epoch, num_epochs=1)
+    epoch = train_model(model, trainloader, optimizer, criterion, scheduler, device, start_epoch=epoch, num_epochs=100)
     # print("[INFO] Training complete.")
 
     # Step 8: Save model checkpoint
