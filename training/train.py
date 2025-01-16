@@ -1,6 +1,8 @@
 import torch
+import os
+from training.save_load import save_checkpoint
 
-def train_model(model, trainloader, optimizer, criterion, scheduler, device, start_epoch, num_epochs):
+def train_model(model, trainloader, optimizer, criterion, scheduler, device, start_epoch, num_epochs, checkpoint_dir=None, save_interval=10):
     """
     Train the model on the given dataset for a specified number of epochs.
 
@@ -13,9 +15,11 @@ def train_model(model, trainloader, optimizer, criterion, scheduler, device, sta
         device (torch.device): The device to train the model on (CPU or GPU).
         start_epoch (int): The starting epoch number (useful for resuming training).
         num_epochs (int): The number of epochs to train for.
+        checkpoint_dir (str, optional): Directory to save checkpoints.
+        save_interval (int, optional): Save checkpoint every `save_interval` epochs.
 
     Returns:
-        None
+        int: The epoch number after completing the training.
     """
     # Total number of batches in an epoch
     num_batches = len(trainloader)
@@ -58,9 +62,13 @@ def train_model(model, trainloader, optimizer, criterion, scheduler, device, sta
         # Step the learning rate scheduler
         scheduler.step()
 
+        # Save a checkpoint if the interval is met and directory is provided
+        if checkpoint_dir and (epoch + 1) % save_interval == 0:
+            checkpoint_path = os.path.join(checkpoint_dir, f"cifar100-checkpoint-{epoch + 1}.pth")
+            save_checkpoint(model, optimizer, scheduler, epoch + 1, checkpoint_path)
+
         # Report the completion of the epoch
         print(f"[INFO] Epoch {epoch + 1} completed.")
 
     print("[INFO] Training complete.")
-    
     return start_epoch + num_epochs

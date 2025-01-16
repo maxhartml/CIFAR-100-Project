@@ -1,57 +1,90 @@
+import os
 import torch
 import warnings
+from glob import glob
 
-def save_checkpoint(model, optimizer, epoch, path):
+def ensure_checkpoint_dir_exists():
     """
-    Save the model and optimizer state to a checkpoint file.
+    Ensure the `checkpoints` folder exists in the project directory.
+    If the directory does not exist, it will be created.
+
+    Returns:
+        str: Path to the `checkpoints` directory.
+    """
+    checkpoint_dir = "./checkpoints"
+    if not os.path.exists(checkpoint_dir):
+        os.makedirs(checkpoint_dir)
+        print(f"[INFO] Created checkpoint directory: {checkpoint_dir}")
+    return checkpoint_dir
+
+def save_checkpoint(model, optimizer, scheduler, epoch, path):
+    """
+    Save the model, optimizer, scheduler state, and current epoch to a checkpoint file.
 
     Args:
         model (torch.nn.Module): The model to save.
         optimizer (torch.optim.Optimizer): The optimizer to save.
+        scheduler (torch.optim.lr_scheduler._LRScheduler): The scheduler to save.
         epoch (int): The current epoch to save.
         path (str): The file path to save the checkpoint.
 
     Returns:
         None
     """
+    # Prepare the checkpoint dictionary
     checkpoint = {
         'epoch': epoch,  # Last completed epoch
         'model_state_dict': model.state_dict(),  # Model weights
-        'optimizer_state_dict': optimizer.state_dict()  # Optimizer state
+        'optimizer_state_dict': optimizer.state_dict(),  # Optimizer state
+        'scheduler_state_dict': scheduler.state_dict()  # Scheduler state
     }
-    torch.save(checkpoint, path)  # Save checkpoint to the specified path
+
+    # Save checkpoint to the specified path
+    torch.save(checkpoint, path)
     print(f"[INFO] Checkpoint saved successfully at: {path}")
 
-
-def load_checkpoint(model, optimizer, path, device):
+def load_latest_checkpoint(model, optimizer, scheduler, checkpoint_dir, device):
     """
-    Load the model and optimizer state from a checkpoint file.
+    Load the latest checkpoint from the `checkpoints` directory.
+    If no checkpoints are found, return 0 to start training from scratch.
 
     Args:
         model (torch.nn.Module): The model to load state into.
         optimizer (torch.optim.Optimizer): The optimizer to load state into.
-        path (str): The file path to load the checkpoint from.
+        scheduler (torch.optim.lr_scheduler._LRScheduler): The scheduler to load state into.
+        checkpoint_dir (str): Path to the directory containing checkpoint files.
         device (torch.device): The device to map the loaded model and optimizer states.
 
     Returns:
         int: The epoch value from the loaded checkpoint, or 0 if no checkpoint is found.
     """
-    try:
-        # Suppress specific warnings related to `torch.load` and weights_only=False
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            checkpoint = torch.load(path, map_location=torch.device(device))
+    # Find all checkpoint files matching the naming pattern
+    checkpoint_files = glob(os.path.join(checkpoint_dir, "cifar100-checkpoint-*.pth"))
+    if not checkpoint_files:
+        print(f"[INFO] No checkpoint files found in {checkpoint_dir}. Starting from scratch.")
+        return 0
 
-        # Load model and optimizer states
+    # Sort files by epoch number (extracted from the filename) in descending order
+    checkpoint_files.sort(key=lambda x: int(x.split("-")[-1].split(".")[0]), reverse=True)
+    latest_checkpoint = checkpoint_files[0]  # Get the latest checkpoint file
+
+    try:
+        # Load the checkpoint file
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")  # Ignore specific warnings related to `torch.load`
+            checkpoint = torch.load(latest_checkpoint, map_location=torch.device(device))
+
+        # Restore model, optimizer, and scheduler states
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+        epoch = checkpoint['epoch']  # Retrieve the last saved epoch
 
-        # Retrieve the epoch from the checkpoint
-        epoch = checkpoint['epoch']
-        print(f"[INFO] Checkpoint loaded successfully from: {path}")
+        print(f"[INFO] Checkpoint loaded successfully from: {latest_checkpoint}")
         print(f"[INFO] Resuming from epoch: {epoch}")
         return epoch
 
-    except FileNotFoundError:
-        print(f"[ERROR] Checkpoint file not found at: {path}. Starting from scratch.")
+    except Exception as e:
+        print(f"[ERROR] Failed to load checkpoint: {latest_checkpoint}")
+        print(f"[ERROR] {e}")
         return 0

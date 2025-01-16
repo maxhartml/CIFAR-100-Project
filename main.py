@@ -8,8 +8,9 @@ from models.cifar100_net import CIFAR100Net
 from datasets.cifar100_loader import get_cifar100_loaders
 from training.train import train_model
 from training.eval import evaluate_model
-from training.save_load import load_checkpoint, save_checkpoint
+from training.save_load import load_latest_checkpoint, ensure_checkpoint_dir_exists
 from gui.image_classifier_gui import ImageClassifierGUI
+
 
 # ---------------------------------------------------
 # Helper Functions
@@ -53,25 +54,27 @@ if __name__ == "__main__":
     print("[INFO] Training configuration complete.")
 
     # Step 6: Checkpoint management
-    checkpoint_path = "/Users/maxhart/Library/Mobile Documents/com~apple~CloudDocs/Documents/AI_AND_ML/Image-BOT/cifar-100/checkpoints/cifar_100_net_checkpoint_epoch_40.pth"
+    checkpoint_dir = ensure_checkpoint_dir_exists()
     print_separator()
     print("[INFO] Checking for existing checkpoints...")
-    epoch = load_checkpoint(model, optimizer, checkpoint_path, device)
-    if epoch == 0:
-        print("[INFO] No checkpoint found. Training will start from scratch.")
+    epoch = load_latest_checkpoint(model, optimizer, scheduler, checkpoint_dir, device)
 
-    # Step 7: Training (Optional)
+    # Step 7: Training
     print_separator()
-    # print(f"[INFO] Starting training from epoch {epoch} for 10 epochs...")
-    epoch = train_model(model, trainloader, optimizer, criterion, scheduler, device, start_epoch=epoch, num_epochs=100)
-    # print("[INFO] Training complete.")
-
-    # Step 8: Save model checkpoint
-    checkpoint_path = f"/Users/maxhart/Library/Mobile Documents/com~apple~CloudDocs/Documents/AI_AND_ML/Image-BOT/cifar-100/checkpoints/cifar_100_net_checkpoint_epoch_{epoch}.pth"
-    print_separator()
-    print("[INFO] Saving model checkpoint...")
-    save_checkpoint(model, optimizer, epoch, checkpoint_path)
-    print(f"[INFO] Model checkpoint saved to: {checkpoint_path}")
+    num_epochs = 1
+    print(f"[INFO] Starting training from epoch {epoch + 1} for {num_epochs} epochs...")
+    epoch = train_model(
+        model=model,
+        trainloader=trainloader,
+        optimizer=optimizer,
+        criterion=criterion,
+        scheduler=scheduler,
+        device=device,
+        start_epoch=epoch,
+        num_epochs=num_epochs,
+        checkpoint_dir=checkpoint_dir,
+        save_interval=10
+    )
 
     # Step 9: Evaluate the model
     print_separator()
