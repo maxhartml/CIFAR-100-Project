@@ -16,3 +16,6 @@ checkpoints/
 
 # Ignore datasets
 data/
+
+# Ignore log files
+logs/

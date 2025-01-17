@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # Step 3: Load the CIFAR-100 dataset
     print_separator()
     print("[INFO] Preparing CIFAR-100 dataset...")
-    trainloader, testloader, classes = get_cifar100_loaders(batch_size=64)
+    trainloader, valloader, testloader, classes = get_cifar100_loaders(batch_size=64)
     print(f"[INFO] Dataset loaded successfully. Number of classes: {len(classes)}")
 
     # Step 4: Initialize the model
@@ -66,6 +66,7 @@ if __name__ == "__main__":
     epoch = train_model(
         model=model,
         trainloader=trainloader,
+        valloader=valloader,
         optimizer=optimizer,
         criterion=criterion,
         scheduler=scheduler,
