@@ -2,8 +2,10 @@ import torchvision
 import torch
 from torchvision import transforms, datasets
 from torch.utils.data import DataLoader, random_split
+from configuration.config_1 import *
+import os
 
-def get_cifar100_loaders(batch_size):
+def get_cifar100_loaders():
     """
     Prepare DataLoaders for the CIFAR-100 dataset with transformations.
 
@@ -33,14 +35,17 @@ def get_cifar100_loaders(batch_size):
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
+    # Get number of CPU cores
+    num_workers =  NUM_WORKERS
+
     # ---------------------------------------------------
     # Load CIFAR-100 Dataset
     # ---------------------------------------------------
     # Load full training dataset
-    full_trainset = datasets.CIFAR100(root="./data", train=True, download=True, transform=train_transform)
+    full_trainset = datasets.CIFAR100(root=DATA_DIR, train=True, download=True, transform=train_transform)
 
     # Split into training and validation sets
-    train_size = int(0.8 * len(full_trainset))
+    train_size = int(TRAIN_SPLIT * len(full_trainset))
     val_size = len(full_trainset) - train_size
     trainset, valset = random_split(full_trainset, [train_size, val_size])
 
@@ -48,10 +53,10 @@ def get_cifar100_loaders(batch_size):
     valset.dataset.transform = test_transform
 
     # Create DataLoaders
-    trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
-    valloader = DataLoader(valset, batch_size=batch_size, shuffle=False, num_workers=2)
-    testset = datasets.CIFAR100(root="./data", train=False, download=True, transform=test_transform)
-    testloader = DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
+    trainloader = DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=num_workers)
+    valloader = DataLoader(valset, batch_size=BATCH_SIZE, shuffle=False, num_workers=num_workers)
+    testset = datasets.CIFAR100(root=DATA_DIR, train=False, download=True, transform=test_transform)
+    testloader = DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False, num_workers=num_workers)
 
     # ---------------------------------------------------
     # Retrieve Class Labels

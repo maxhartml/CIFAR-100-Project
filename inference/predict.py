@@ -1,7 +1,8 @@
 import torch
 from inference.preprocess import preprocess_image
+from configuration.config_1 import DEVICE
 
-def predict_image(model, image_path, device, classes):
+def predict_image(model, image_path, classes):
     """
     Predict the class label for a given image using the model.
 
@@ -15,7 +16,7 @@ def predict_image(model, image_path, device, classes):
         str: The predicted class label for the input image.
     """
     # Preprocess the input image
-    input_image = preprocess_image(image_path).to(device)
+    input_image = preprocess_image(image_path).to(DEVICE)
 
     # Set the model to evaluation mode
     model.eval()

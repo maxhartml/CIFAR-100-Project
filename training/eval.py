@@ -1,57 +1,62 @@
 import torch
+from torchmetrics.classification import MulticlassAccuracy
+from configuration.config_1 import DEVICE
 
-def evaluate_model(model, testloader, device, classes):
+def evaluate_model(model, testloader, classes, writer, epoch):
     """
-    Evaluate the trained model on the test dataset and print accuracy metrics.
+    Evaluate the trained model on the test dataset and return accuracy metrics.
 
     Args:
         model (torch.nn.Module): The trained model to evaluate.
         testloader (torch.utils.data.DataLoader): DataLoader for the test dataset.
-        device (torch.device): Device on which computations are performed (CPU or GPU).
         classes (list): List of class names corresponding to the dataset.
 
     Returns:
-        None
+        dict: Dictionary containing overall accuracy and per-class accuracy.
     """
     # Set the model to evaluation mode (disables dropout, batchnorm updates, etc.)
     model.eval()
 
-    # Initialize counters for overall and per-class accuracy
-    correct = 0
-    total = 0
-    class_correct = {classname: 0 for classname in classes}
-    class_total = {classname: 0 for classname in classes}
+    # Metrics for overall and per-class accuracy
+    overall_metric = MulticlassAccuracy(num_classes=len(classes)).to(DEVICE)
+    per_class_metric = MulticlassAccuracy(num_classes=len(classes), average=None).to(DEVICE)
+
+    all_predictions = []
+    all_labels = []
 
     # Disable gradient computation during evaluation for efficiency
     with torch.no_grad():
         for data in testloader:
             images, labels = data
-            images = images.to(device)
-            labels = labels.to(device)
+            images = images.to(DEVICE)
+            labels = labels.to(DEVICE)
 
             # Forward pass: compute predictions
             outputs = model(images)
             _, predictions = torch.max(outputs, 1)  # Get the predicted class with the highest score
 
-            # Update overall accuracy counters
-            total += labels.size(0)
-            correct += (predictions == labels).sum().item()
+            # Accumulate predictions and labels
+            all_predictions.append(predictions)
+            all_labels.append(labels)
 
-            # Update per-class accuracy counters
-            for label, prediction in zip(labels, predictions):
-                if label == prediction:
-                    class_correct[classes[label]] += 1
-                class_total[classes[label]] += 1
-    
-    # Calculate and print overall accuracy
-    accuracy = 100 * correct / total
-    print(f"[INFO] Overall accuracy on the test dataset: {accuracy:.2f}%")
+    # Concatenate all predictions and labels for metric computation
+    all_predictions = torch.cat(all_predictions)
+    all_labels = torch.cat(all_labels)
 
-    # Calculate and print accuracy for each class
+    # Compute metrics
+    overall_accuracy = overall_metric(all_predictions, all_labels).item() * 100  # Overall accuracy in percentage
+    per_class_accuracy = per_class_metric(all_predictions, all_labels) * 100  # Per-class accuracy as percentages
+
+    # Print results
+    print(f"[INFO] Overall accuracy on the test dataset: {overall_accuracy:.2f}%")
+    writer.add_scalar("Accuracy/Overall", overall_accuracy, epoch)
     print("[INFO] Per-class accuracy:")
-    for classname, correct_count in class_correct.items():
-        if class_total[classname] > 0:  # Avoid division by zero
-            class_accuracy = 100 * float(correct_count) / class_total[classname]
-            print(f"  - {classname:15s}: {class_accuracy:.2f}%")
-        else:
-            print(f"  - {classname:15s}: No samples in test set")
+    for classname, accuracy in zip(classes, per_class_accuracy.tolist()):
+        print(f"  - {classname:15s}: {accuracy:.2f}%")
+        writer.add_scalar(f"Accuracy/{classname}", accuracy, epoch)
+
+    # Return metrics as a dictionary
+    return {
+        "overall_accuracy": overall_accuracy,
+        "per_class_accuracy": dict(zip(classes, per_class_accuracy.tolist()))
+    }

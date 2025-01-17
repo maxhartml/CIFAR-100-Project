@@ -1,6 +1,7 @@
 import torch
+from configuration.config_1 import DEVICE
 
-def compute_validation_loss(model, valloader, criterion, device):
+def compute_validation_loss(model, valloader, criterion):
     """
     Compute the validation loss for the model on the validation set.
 
@@ -18,7 +19,7 @@ def compute_validation_loss(model, valloader, criterion, device):
 
     with torch.no_grad():  # Disable gradient computation
         for inputs, labels in valloader:
-            inputs, labels = inputs.to(device), labels.to(device)
+            inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
             outputs = model(inputs)
             loss = criterion(outputs, labels)
             total_loss += loss.item()

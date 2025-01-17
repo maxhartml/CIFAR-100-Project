@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 from PIL import Image, ImageTk
 from inference.predict import predict_image
+from configuration.config_1 import DEVICE
 
 class ImageClassifierGUI:
     """
@@ -14,7 +15,7 @@ class ImageClassifierGUI:
         - Displays the prediction result on the GUI.
     """
 
-    def __init__(self, root, model, device, classes):
+    def __init__(self, root, model, classes):
         """
         Initialize the GUI with a root window, model, device, and class labels.
 
@@ -26,7 +27,7 @@ class ImageClassifierGUI:
         """
         self.root = root
         self.model = model
-        self.device = device
+        self.device = DEVICE
         self.classes = classes
 
         # GUI Configuration

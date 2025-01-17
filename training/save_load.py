@@ -2,20 +2,17 @@ import os
 import torch
 import warnings
 from glob import glob
+from configuration.config_1 import *
 
 def ensure_checkpoint_dir_exists():
     """
     Ensure the `checkpoints` folder exists in the project directory.
     If the directory does not exist, it will be created.
-
-    Returns:
-        str: Path to the `checkpoints` directory.
     """
-    checkpoint_dir = "./checkpoints"
-    if not os.path.exists(checkpoint_dir):
-        os.makedirs(checkpoint_dir)
-        print(f"[INFO] Created checkpoint directory: {checkpoint_dir}")
-    return checkpoint_dir
+
+    if not os.path.exists(CHECKPOINT_DIR):
+        os.makedirs(CHECKPOINT_DIR)
+        print(f"[INFO] Created checkpoint directory: {CHECKPOINT_DIR}")
 
 def save_checkpoint(model, optimizer, scheduler, epoch, path):
     """
@@ -43,7 +40,7 @@ def save_checkpoint(model, optimizer, scheduler, epoch, path):
     torch.save(checkpoint, path)
     print(f"[INFO] Checkpoint saved successfully at: {path}")
 
-def load_latest_checkpoint(model, optimizer, scheduler, checkpoint_dir, device):
+def load_latest_checkpoint(model, optimizer, scheduler):
     """
     Load the latest checkpoint from the `checkpoints` directory.
     If no checkpoints are found, return 0 to start training from scratch.
@@ -59,9 +56,9 @@ def load_latest_checkpoint(model, optimizer, scheduler, checkpoint_dir, device):
         int: The epoch value from the loaded checkpoint, or 0 if no checkpoint is found.
     """
     # Find all checkpoint files matching the naming pattern
-    checkpoint_files = glob(os.path.join(checkpoint_dir, "cifar100-checkpoint-*.pth"))
+    checkpoint_files = glob(os.path.join(CHECKPOINT_DIR, "cifar100-checkpoint-*.pth"))
     if not checkpoint_files:
-        print(f"[INFO] No checkpoint files found in {checkpoint_dir}. Starting from scratch.")
+        print(f"[INFO] No checkpoint files found in {CHECKPOINT_DIR}. Starting from scratch.")
         return 0
 
     # Sort files by epoch number (extracted from the filename) in descending order
@@ -72,7 +69,7 @@ def load_latest_checkpoint(model, optimizer, scheduler, checkpoint_dir, device):
         # Load the checkpoint file
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")  # Ignore specific warnings related to `torch.load`
-            checkpoint = torch.load(latest_checkpoint, map_location=torch.device(device))
+            checkpoint = torch.load(latest_checkpoint, map_location=torch.device(DEVICE))
 
         # Restore model, optimizer, and scheduler states
         model.load_state_dict(checkpoint['model_state_dict'])

@@ -1,3 +1,5 @@
+from configuration.config_1 import *
+
 class EarlyStopping:
     """
     Early stopping to terminate training when validation loss stops improving.
@@ -6,8 +8,8 @@ class EarlyStopping:
         patience (int): How many epochs to wait after the last improvement.
         delta (float): Minimum change in validation loss to qualify as improvement.
     """
-    def __init__(self, patience=5, delta=0.0):
-        self.patience = patience
+    def __init__(self, patience = 5, delta=0.0):
+        self.patience = PATIENCE
         self.delta = delta
         self.best_loss = None
         self.counter = 0
