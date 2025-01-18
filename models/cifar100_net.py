@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from configuration.config_1 import DROPOUT_RATE
 
 class CIFAR100Net(nn.Module):
     """
@@ -58,11 +59,11 @@ class CIFAR100Net(nn.Module):
         # ---------------------------------------------------
         # First fully connected layer: input (512x4x4 = 8192), output (1024)
         self.fc1 = nn.Linear(512 * 4 * 4, 1024)
-        self.dropout1 = nn.Dropout(0.5)  # Dropout to reduce overfitting
+        self.dropout1 = nn.Dropout(DROPOUT_RATE)  # Dropout to reduce overfitting
 
         # Second fully connected layer: input (1024), output (512)
         self.fc2 = nn.Linear(1024, 512)
-        self.dropout2 = nn.Dropout(0.5)
+        self.dropout2 = nn.Dropout(DROPOUT_RATE) # Dropout to reduce overfitting
 
         # Third fully connected layer: input (512), output (100 classes for CIFAR-100)
         self.fc3 = nn.Linear(512, 100)

@@ -22,12 +22,16 @@ def get_cifar100_loaders():
     # Data augmentation and normalization for training and test datasets.
     # Training: Adds random cropping and horizontal flipping for data augmentation.
     # Test: Only normalization, no data augmentation.
+  
     train_transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=AUGMENTATION_PADDING),  # Randomly crop with padding for better generalization
-        transforms.RandomHorizontalFlip(),    # Random horizontal flipping for data augmentation
-        transforms.ToTensor(),                # Convert PIL images to PyTorch tensors
-        transforms.Normalize(MEAN, STD)  # Normalize to range [-1, 1]
+        transforms.RandomCrop(32, padding=AUGMENTATION_PADDING), # Add random cropping
+        transforms.RandomHorizontalFlip(), # Add random horizontal flipping
+        transforms.RandomRotation(15),  # Add random rotation
+        transforms.RandomErasing(),     # Add random erasing
+        transforms.ToTensor(),          # Convert PIL images to PyTorch tensors
+        transforms.Normalize(MEAN, STD) # Normalize to range [-1, 1]
     ])
+
 
     test_transform = transforms.Compose([
         transforms.ToTensor(),
