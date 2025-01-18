@@ -1,9 +1,9 @@
-import torch
 import os
 from training.save_load import save_checkpoint
 from training.validation import compute_validation_loss
 from training.early_stopping import EarlyStopping
 from configuration.config_1 import *
+import time
 
 def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, start_epoch, writer):
     """
@@ -24,7 +24,7 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
 
     # TensorBoard Writer
    
-    early_stopping = EarlyStopping(patience=PATIENCE)
+    early_stopping = EarlyStopping()
 
     # Total number of batches in an epoch
     num_batches = len(trainloader)
@@ -36,10 +36,16 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
         running_loss = 0.0
         model.train()  # Ensure the model is in training mode
 
+        # Track start time for calculating images per second
+        start_time = time.time()
+        total_images = 0
+
         # Iterate over batches
         for i, data in enumerate(trainloader):
             # Get inputs and labels, and move them to the device
             inputs, labels = data
+            batch_size = inputs.size(0)  # Get the batch size
+            total_images += batch_size  # Track the total images processed
             inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
 
             # Zero the parameter gradients
@@ -60,20 +66,27 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
             if (i + 1) % print_every == 0:
                 current_lr = optimizer.param_groups[0]['lr']
                 avg_train_loss = running_loss / print_every
-                val_loss = compute_validation_loss(model, valloader, criterion, DEVICE)
+                val_loss = compute_validation_loss(model, valloader, criterion)
+
+                # Calculate elapsed time and images per second
+                elapsed_time = time.time() - start_time
+                images_per_second = total_images / elapsed_time
+
                 print(f"[Epoch {epoch + 1}, Batch {i + 1}/{num_batches}] "
-                      f"LR: {current_lr:.6f}, Train Loss: {avg_train_loss:.4f}, Val Loss: {val_loss:.4f}")
+                      f"LR: {current_lr:.6f}, Train Loss: {avg_train_loss:.4f}, Val Loss: {val_loss:.4f}, "
+                      f"Images/sec: {images_per_second:.2f}")
                 
                  # Log metrics to TensorBoard
                 writer.add_scalar("Loss/train", avg_train_loss, epoch * num_batches + i)
                 writer.add_scalar("Loss/validation", val_loss, epoch * num_batches + i)
                 writer.add_scalar("Learning Rate", current_lr, epoch * num_batches + i)
+                writer.add_scalar("Performance/images_per_sec", images_per_second, epoch * num_batches + i)
 
                 running_loss = 0.0
 
         # Step the learning rate scheduler
         scheduler.step()
-
+        
         # Save a checkpoint if the interval is met and directory is provided
         if CHECKPOINT_DIR and (epoch + 1) % SAVE_INTERVAL == 0:
             checkpoint_path = os.path.join(CHECKPOINT_DIR, f"cifar100-checkpoint-{epoch + 1}.pth")
@@ -83,7 +96,7 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
         print(f"[INFO] Epoch {epoch + 1} completed.")
 
         # Early Stopping
-        val_loss = compute_validation_loss(model, valloader, criterion, DEVICE)
+        val_loss = compute_validation_loss(model, valloader, criterion)
         early_stopping(val_loss)
         if early_stopping.early_stop:
             writer.add_text("Early Stopping", f"Triggered at epoch {epoch + 1}", epoch + 1) 

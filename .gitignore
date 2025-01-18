@@ -19,3 +19,5 @@ data/
 
 # Ignore log files
 logs/
+
+.DS_Store

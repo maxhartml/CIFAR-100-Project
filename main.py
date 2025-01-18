@@ -83,12 +83,13 @@ if __name__ == "__main__":
     evaluate_model(model, testloader, classes, writer, epoch)
     print("[INFO] Evaluation complete.")
 
-    # Step 10: Launch the GUI
-    print_separator()
-    print("[INFO] Launching the GUI...")
-    root = tk.Tk()
-    app = ImageClassifierGUI(root, model, classes)
-    root.mainloop()
+    if DEVICE == "cpu":
+        # Step 10: Launch the GUI
+        print_separator()
+        print("[INFO] Launching the GUI...")
+        root = tk.Tk()
+        app = ImageClassifierGUI(root, model, classes)
+        root.mainloop()
 
     # Step 11: Program End
     print("[INFO] GUI session ended. Program complete.")

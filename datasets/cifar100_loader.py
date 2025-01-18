@@ -3,7 +3,6 @@ import torch
 from torchvision import transforms, datasets
 from torch.utils.data import DataLoader, random_split
 from configuration.config_1 import *
-import os
 
 def get_cifar100_loaders():
     """
@@ -24,20 +23,20 @@ def get_cifar100_loaders():
     # Training: Adds random cropping and horizontal flipping for data augmentation.
     # Test: Only normalization, no data augmentation.
     train_transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),  # Randomly crop with padding for better generalization
+        transforms.RandomCrop(32, padding=AUGMENTATION_PADDING),  # Randomly crop with padding for better generalization
         transforms.RandomHorizontalFlip(),    # Random horizontal flipping for data augmentation
         transforms.ToTensor(),                # Convert PIL images to PyTorch tensors
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  # Normalize to range [-1, 1]
+        transforms.Normalize(MEAN, STD)  # Normalize to range [-1, 1]
     ])
 
     test_transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        transforms.Normalize(MEAN, STD)
     ])
 
     # Get number of CPU cores
     num_workers =  NUM_WORKERS
-
+    
     # ---------------------------------------------------
     # Load CIFAR-100 Dataset
     # ---------------------------------------------------

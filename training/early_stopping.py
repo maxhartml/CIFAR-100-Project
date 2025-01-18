@@ -8,9 +8,9 @@ class EarlyStopping:
         patience (int): How many epochs to wait after the last improvement.
         delta (float): Minimum change in validation loss to qualify as improvement.
     """
-    def __init__(self, patience = 5, delta=0.0):
+    def __init__(self):
         self.patience = PATIENCE
-        self.delta = delta
+        self.delta = 0.0
         self.best_loss = None
         self.counter = 0
         self.early_stop = False

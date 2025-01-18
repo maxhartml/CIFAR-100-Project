@@ -1,5 +1,6 @@
 import torchvision.transforms as transforms
 from PIL import Image
+from configuration.config_1 import *
 
 def preprocess_image(image_path):
     """
@@ -13,9 +14,9 @@ def preprocess_image(image_path):
     """
     # Define the transformations: resize, convert to tensor, and normalize
     transform = transforms.Compose([
-        transforms.Resize((32, 32)),  # Resize image to 32x32 pixels
+        transforms.Resize(IMAGE_SIZE),  # Resize image to 32x32 pixels
         transforms.ToTensor(),       # Convert image to PyTorch tensor
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  # Normalize to CIFAR-like range
+        transforms.Normalize(mean=MEAN, std=STD)  # Normalize to CIFAR-like range
     ])
 
     # Open the image, ensure it's RGB, and apply transformations
