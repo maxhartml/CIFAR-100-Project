@@ -3,6 +3,8 @@ import torch
 from torchvision import transforms, datasets
 from torch.utils.data import DataLoader, random_split
 from configuration.config_1 import *
+from torchvision.utils import make_grid
+import matplotlib.pyplot as plt
 
 def get_cifar100_loaders():
     """
@@ -26,10 +28,10 @@ def get_cifar100_loaders():
     train_transform = transforms.Compose([
         transforms.RandomCrop(32, padding=AUGMENTATION_PADDING), # Add random cropping
         transforms.RandomHorizontalFlip(), # Add random horizontal flipping
-        transforms.RandomRotation(15),  # Add random rotation
-        transforms.RandomErasing(),     # Add random erasing
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1), # simulate lighting changes
         transforms.ToTensor(),          # Convert PIL images to PyTorch tensors
-        transforms.Normalize(MEAN, STD) # Normalize to range [-1, 1]
+        transforms.Normalize(MEAN, STD), # Normalize to range [-1, 1]
+        #transforms.RandomErasing(p=0.5, scale=(0.02, 0.2), ratio=(0.3,3.3)),     # Add random erasing
     ])
 
 
@@ -37,6 +39,15 @@ def get_cifar100_loaders():
         transforms.ToTensor(),
         transforms.Normalize(MEAN, STD)
     ])
+
+    def show_augmented_samples(loader, filename="augmented_samples.png"):
+        data_iter = iter(loader)
+        images, labels = next(data_iter)
+        grid = make_grid(images[:8], nrow=4, normalize=True, scale_each=True)
+        plt.imshow(grid.permute(1, 2, 0))
+        plt.axis('off')  # Optional: Remove axes for a cleaner image
+        plt.savefig(filename)  # Save the figure
+        print(f"Augmented samples saved to {filename}")
 
     # Get number of CPU cores
     num_workers =  NUM_WORKERS
@@ -67,6 +78,10 @@ def get_cifar100_loaders():
     # CIFAR-100 contains 100 classes, which can be retrieved as a list of strings.
     classes = full_trainset.classes
 
+
+    # Call this on your trainloader
+    show_augmented_samples(trainloader)
+    
     # ---------------------------------------------------
     # Return the DataLoaders and Class Labels
     # ---------------------------------------------------

@@ -52,7 +52,7 @@ if __name__ == "__main__":
     # Step 5: Define loss function, optimizer, and learning rate scheduler
     print_separator()
     print("[INFO] Setting up training configuration...")
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
     optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     scheduler = StepLR(optimizer, step_size=SCHEDULER_STEP_SIZE, gamma=SCHEDULER_GAMMA)
     print("[INFO] Training configuration complete.")

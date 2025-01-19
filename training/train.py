@@ -57,6 +57,11 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
 
             # Backward pass and optimization
             loss.backward()
+
+            # Gradient clipping
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0, norm_type=2.0)
+
+            # Optimisation step
             optimizer.step()
 
             # Accumulate loss for reporting
