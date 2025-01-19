@@ -9,7 +9,7 @@ LOG_DIR = "./logs"
 NUM_WORKERS = os.cpu_count() - 1  # Use all but one core
 
 # Data Configurations
-BATCH_SIZE = 512
+BATCH_SIZE = 128
 TRAIN_SPLIT = 0.8
 IMAGE_SIZE = (32, 32)
 MEAN = (0.5, 0.5, 0.5)
@@ -23,5 +23,5 @@ SCHEDULER_STEP_SIZE = 10
 SCHEDULER_GAMMA = 0.5
 PATIENCE = 10
 SAVE_INTERVAL = 10
-DROPOUT_RATE = 0.5
+DROPOUT_RATE = 0.7
 WEIGHT_DECAY = 0.0005
