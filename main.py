@@ -98,7 +98,6 @@ if __name__ == "__main__":
     print("[INFO] Test Accuracy: {:.2f}%".format(test_accuracy))
     print("[INFO] Evaluation complete.")
 
-    
     # Step 10: Launch the GUI
     # print_separator()
     # print("[INFO] Launching the GUI...")
@@ -106,7 +105,12 @@ if __name__ == "__main__":
     # app = ImageClassifierGUI(root, model, classes)
     # root.mainloop()
 
-    # Step 11: Program End
+    # Step 11: Save the final model
+    print_separator()
+    print("[INFO] Saving the final model...")
+    torch.save(model, os.path.join(DEPLOY_DIR, f"{run_name}_model.pth"))
+
+    # Step 12: Program End
     print_separator()
     writer.close()
     print("[INFO] Tensorboard writer closed.")
