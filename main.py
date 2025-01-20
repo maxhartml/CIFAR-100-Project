@@ -3,8 +3,10 @@ import torch.optim as optim
 import torch.nn as nn
 from torch.optim.lr_scheduler import StepLR
 import tkinter as tk
+from torchvision.models import resnet18, ResNet18_Weights
 
-from models.cifar100_net import CIFAR100Net
+from models.cifar100_net import CNN
+from models.cifar100_resnet import CustomResNet18
 from datasets.cifar100_loader import get_cifar100_loaders
 from training.train import train_model
 from training.eval import evaluate_model
@@ -45,8 +47,18 @@ if __name__ == "__main__":
     # Step 4: Initialize the model
     print_separator()
     print("[INFO] Initializing model...")
-    model = CIFAR100Net().to(DEVICE)
+    # Uncomment the desired model initialization
+    # Model 1: Custom CNN
+    # model = CNN().to(DEVICE)
+    # Model 2: Custom ResNet18
+    # model = CustomResNet18().to(DEVICE)
+    # Model 3: Pretrained ResNet18
+    model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).to(DEVICE)  # Use ResNet18 pretrained on ImageNet
+    model.fc = nn.Linear(model.fc.in_features, 100).to(DEVICE)  # Modify the final layer for CIFAR-100 Dataset
+    # Print the total number of parameters
     total_params = sum(p.numel() for p in model.parameters())
+    # Print the name of the model
+    print(f"[INFO] Using Model: {model.__class__.__name__}")  # Prints the name of the model class
     print(f"[INFO] Model initialized with {total_params:,} parameters.")
 
     # Step 5: Define loss function, optimizer, and learning rate scheduler
