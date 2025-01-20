@@ -5,8 +5,8 @@ from torch.optim.lr_scheduler import StepLR
 import tkinter as tk
 from torchvision.models import resnet18, ResNet18_Weights
 
-from models.cifar100_net import CNN
-from models.cifar100_resnet import CustomResNet18
+from models.custom_CNN import CNN
+from models.custom_ResNet import CustomResNet18
 from datasets.cifar100_loader import get_cifar100_loaders
 from training.train import train_model
 from metrics.comptute_accuracy import compute_accuracy
