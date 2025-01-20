@@ -67,10 +67,10 @@ def get_cifar100_loaders():
     valset.dataset.transform = test_transform
 
     # Create DataLoaders
-    trainloader = DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=num_workers)
-    valloader = DataLoader(valset, batch_size=BATCH_SIZE, shuffle=False, num_workers=num_workers)
+    trainloader = DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, pin_memory=True, num_workers=num_workers)
+    valloader = DataLoader(valset, batch_size=BATCH_SIZE, shuffle=False, pin_memory=True, num_workers=num_workers)
     testset = datasets.CIFAR100(root=DATA_DIR, train=False, download=True, transform=test_transform)
-    testloader = DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False, num_workers=num_workers)
+    testloader = DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False, pin_memory=True, num_workers=num_workers)
 
     # ---------------------------------------------------
     # Retrieve Class Labels

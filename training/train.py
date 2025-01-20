@@ -97,12 +97,11 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
         val_accuracy = compute_accuracy(model, valloader, num_classes=100)
 
         # Log accuracy metrics to TensorBoard
-        writer.add_scalar("Accuracy/train", train_accuracy, epoch)
-        writer.add_scalar("Accuracy/validation", val_accuracy, epoch)
+        writer.add_scalar("Accuracy/train", train_accuracy, epoch * num_batches + i)
+        writer.add_scalar("Accuracy/validation", val_accuracy, epoch * num_batches + i)
 
         # Report the completion of the epoch
-        print(f"[INFO] Epoch {epoch + 1} completed. Train Acc: {train_accuracy:.2f}%, Val Acc: {val_accuracy:.2f}%")
-        print(f'[INFO] Time taken for epoch: {time.time() - start_time:.2f} seconds')
+        print(f"[INFO] Epoch {epoch + 1} completed. Time taken: {time.time() - start_time:.2f} seconds. Train Acc: {train_accuracy:.2f}%, Val Acc: {val_accuracy:.2f}%")
 
         # Save a checkpoint if the interval is met and directory is provided
         if CHECKPOINT_DIR and (epoch + 1) % SAVE_INTERVAL == 0:

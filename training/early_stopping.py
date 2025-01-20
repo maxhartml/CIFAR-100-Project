@@ -23,5 +23,3 @@ class EarlyStopping:
             self.counter += 1  # Increment the counter if no improvement
             if self.counter >= self.patience:
                 self.early_stop = True  # Trigger early stopping if patience is exceeded
-        
-        print(f'[INFO] current_val_loss: {val_loss}, best_val_loss: {self.best_loss}, counter: {self.counter}')
