@@ -9,7 +9,7 @@ from models.cifar100_net import CNN
 from models.cifar100_resnet import CustomResNet18
 from datasets.cifar100_loader import get_cifar100_loaders
 from training.train import train_model
-from training.eval import evaluate_model
+from metrics.comptute_accuracy import compute_accuracy
 from training.save_load import load_latest_checkpoint, ensure_checkpoint_dir_exists
 from gui.image_classifier_gui import ImageClassifierGUI
 from configuration.config_1 import *
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # Step 9: Evaluate the model
     print_separator()
     print("[INFO] Evaluating model on test data...")
-    evaluate_model(model, testloader, classes, writer, epoch)
+    compute_accuracy(model, testloader)
     print("[INFO] Evaluation complete.")
 
     

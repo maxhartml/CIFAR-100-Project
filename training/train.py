@@ -1,6 +1,7 @@
 import os
 from training.save_load import save_checkpoint
-from training.validation import compute_validation_loss
+from metrics.compute_validation_loss import compute_validation_loss
+from metrics.comptute_accuracy import compute_accuracy
 from training.early_stopping import EarlyStopping
 from configuration.config_1 import *
 import time
@@ -17,13 +18,10 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
         criterion (torch.nn.Module): The loss function to minimize.
         scheduler (torch.optim.lr_scheduler._LRScheduler): The learning rate scheduler.
         start_epoch (int): The starting epoch number (useful for resuming training).
-       
+
     Returns:
         int: The epoch number after completing the training.
     """
-
-    # TensorBoard Writer
-   
     early_stopping = EarlyStopping()
 
     # Total number of batches in an epoch
@@ -73,17 +71,23 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
                 avg_train_loss = running_loss / print_every
                 val_loss = compute_validation_loss(model, valloader, criterion)
 
+                # Compute train and validation accuracy using the modularised function
+                train_accuracy = compute_accuracy(model, trainloader, num_classes=100)
+                val_accuracy = compute_accuracy(model, valloader, num_classes=100)
+
                 # Calculate elapsed time and images per second
                 elapsed_time = time.time() - start_time
                 images_per_second = total_images / elapsed_time
 
                 print(f"[Epoch {epoch + 1}, Batch {i + 1}/{num_batches}] "
-                      f"LR: {current_lr:.6f}, Train Loss: {avg_train_loss:.4f}, Val Loss: {val_loss:.4f}, "
-                      f"Images/sec: {images_per_second:.2f}")
-                
-                 # Log metrics to TensorBoard
+                      f"LR: {current_lr:.6f}, Train Loss: {avg_train_loss:.4f}, Train Acc: {train_accuracy:.2f}%, "
+                      f"Val Loss: {val_loss:.4f}, Val Acc: {val_accuracy:.2f}%, Images/sec: {images_per_second:.2f}")
+
+                # Log metrics to TensorBoard
                 writer.add_scalar("Loss/train", avg_train_loss, epoch * num_batches + i)
                 writer.add_scalar("Loss/validation", val_loss, epoch * num_batches + i)
+                writer.add_scalar("Accuracy/train", train_accuracy, epoch * num_batches + i)
+                writer.add_scalar("Accuracy/validation", val_accuracy, epoch * num_batches + i)
                 writer.add_scalar("Learning Rate", current_lr, epoch * num_batches + i)
                 writer.add_scalar("Performance/images_per_sec", images_per_second, epoch * num_batches + i)
 
@@ -99,6 +103,7 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
 
         # Report the completion of the epoch
         print(f"[INFO] Epoch {epoch + 1} completed.")
+        print(f'[INFO] Time taken for epoch: {time.time() - start_time:.2f} seconds')
 
         # Early Stopping
         val_loss = compute_validation_loss(model, valloader, criterion)
@@ -107,7 +112,6 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
             writer.add_text("Early Stopping", f"Triggered at epoch {epoch + 1}", epoch + 1) 
             print(f"[INFO] Early stopping triggered at epoch {epoch + 1}")
             break
-    
-    
+
     print("[INFO] Training complete.")
     return start_epoch + NUM_EPOCHS
