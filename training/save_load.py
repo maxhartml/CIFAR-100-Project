@@ -4,15 +4,15 @@ import warnings
 from glob import glob
 from configuration.config_1 import *
 
-def ensure_checkpoint_dir_exists():
+def ensure_checkpoint_dir_exists(dir_path):
     """
     Ensure the `checkpoints` folder exists in the project directory.
     If the directory does not exist, it will be created.
     """
 
-    if not os.path.exists(CHECKPOINT_DIR):
-        os.makedirs(CHECKPOINT_DIR)
-        print(f"[INFO] Created checkpoint directory: {CHECKPOINT_DIR}")
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+        print(f"[INFO] Created directory: {dir_path}")
 
 def save_checkpoint(model, optimizer, scheduler, epoch, path):
     """

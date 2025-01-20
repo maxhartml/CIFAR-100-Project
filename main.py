@@ -51,9 +51,9 @@ if __name__ == "__main__":
     print("[INFO] Initializing model...")
     # Uncomment the desired model initialization
     # Model 1: Custom CNN
-    model = CNN().to(DEVICE)
+    # model = CNN().to(DEVICE)
     # Model 2: Custom ResNet18
-    # model = CustomResNet18().to(DEVICE)
+    model = CustomResNet18().to(DEVICE)
     # Model 3: Pretrained ResNet18
     # model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).to(DEVICE)  # Use ResNet18 pretrained on ImageNet
     # model.fc = nn.Linear(model.fc.in_features, 100).to(DEVICE)  # Modify the final layer for CIFAR-100 Dataset
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     print("[INFO] Training configuration complete.")
 
     # Step 6: Checkpoint management
-    ensure_checkpoint_dir_exists()
+    ensure_checkpoint_dir_exists(dir_path=CHECKPOINT_DIR)
     print_separator()
     print("[INFO] Checking for existing checkpoints...")
     epoch = load_latest_checkpoint(model, optimizer, scheduler)
@@ -108,7 +108,8 @@ if __name__ == "__main__":
     # Step 11: Save the final model
     print_separator()
     print("[INFO] Saving the final model...")
-    torch.save(model, os.path.join(DEPLOY_DIR, f"{run_name}_model.pth"))
+    ensure_checkpoint_dir_exists(dir_path=DEPLOY_DIR)
+    torch.save(model.state_dict(), os.path.join(DEPLOY_DIR, f"{run_name}_model.pth"))
 
     # Step 12: Program End
     print_separator()
