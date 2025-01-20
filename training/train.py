@@ -26,7 +26,7 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
 
     # Total number of batches in an epoch
     num_batches = len(trainloader)
-    print_every = max(1, num_batches // 10)  # Print progress 10 times per epoch
+    print_every = max(1, num_batches // 2)  # Print progress 2 times per epoch
 
     # Training loop
     for epoch in range(start_epoch, start_epoch + NUM_EPOCHS):
@@ -37,6 +37,7 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
         # Track start time for calculating images per second
         start_time = time.time()
         total_images = 0
+        val_loss = None  # Variable to store validation loss
 
         # Iterate over batches
         for i, data in enumerate(trainloader):
@@ -69,25 +70,20 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
             if (i + 1) % print_every == 0:
                 current_lr = optimizer.param_groups[0]['lr']
                 avg_train_loss = running_loss / print_every
-                val_loss = compute_validation_loss(model, valloader, criterion)
-
-                # Compute train and validation accuracy using the modularised function
-                train_accuracy = compute_accuracy(model, trainloader, num_classes=100)
-                val_accuracy = compute_accuracy(model, valloader, num_classes=100)
+                val_loss = compute_validation_loss(model, valloader, criterion)  # Compute validation loss once
+                model.train()  # Reset to training mode after validation
 
                 # Calculate elapsed time and images per second
                 elapsed_time = time.time() - start_time
                 images_per_second = total_images / elapsed_time
 
                 print(f"[Epoch {epoch + 1}, Batch {i + 1}/{num_batches}] "
-                      f"LR: {current_lr:.6f}, Train Loss: {avg_train_loss:.4f}, Train Acc: {train_accuracy:.2f}%, "
-                      f"Val Loss: {val_loss:.4f}, Val Acc: {val_accuracy:.2f}%, Images/sec: {images_per_second:.2f}")
+                      f"LR: {current_lr:.6f}, Train Loss: {avg_train_loss:.4f}, "
+                      f"Val Loss: {val_loss:.4f}, Images/sec: {images_per_second:.2f}")
 
                 # Log metrics to TensorBoard
                 writer.add_scalar("Loss/train", avg_train_loss, epoch * num_batches + i)
                 writer.add_scalar("Loss/validation", val_loss, epoch * num_batches + i)
-                writer.add_scalar("Accuracy/train", train_accuracy, epoch * num_batches + i)
-                writer.add_scalar("Accuracy/validation", val_accuracy, epoch * num_batches + i)
                 writer.add_scalar("Learning Rate", current_lr, epoch * num_batches + i)
                 writer.add_scalar("Performance/images_per_sec", images_per_second, epoch * num_batches + i)
 
@@ -95,21 +91,28 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
 
         # Step the learning rate scheduler
         scheduler.step()
-        
+
+        # Compute train and validation accuracy using the modularised function
+        train_accuracy = compute_accuracy(model, trainloader, num_classes=100)
+        val_accuracy = compute_accuracy(model, valloader, num_classes=100)
+
+        # Log accuracy metrics to TensorBoard
+        writer.add_scalar("Accuracy/train", train_accuracy, epoch)
+        writer.add_scalar("Accuracy/validation", val_accuracy, epoch)
+
+        # Report the completion of the epoch
+        print(f"[INFO] Epoch {epoch + 1} completed. Train Acc: {train_accuracy:.2f}%, Val Acc: {val_accuracy:.2f}%")
+        print(f'[INFO] Time taken for epoch: {time.time() - start_time:.2f} seconds')
+
         # Save a checkpoint if the interval is met and directory is provided
         if CHECKPOINT_DIR and (epoch + 1) % SAVE_INTERVAL == 0:
             checkpoint_path = os.path.join(CHECKPOINT_DIR, f"cifar100-checkpoint-{epoch + 1}.pth")
             save_checkpoint(model, optimizer, scheduler, epoch + 1, checkpoint_path)
 
-        # Report the completion of the epoch
-        print(f"[INFO] Epoch {epoch + 1} completed.")
-        print(f'[INFO] Time taken for epoch: {time.time() - start_time:.2f} seconds')
-
-        # Early Stopping
-        val_loss = compute_validation_loss(model, valloader, criterion)
+        # Early Stopping (use the validation loss already computed in the loop)
         early_stopping(val_loss)
         if early_stopping.early_stop:
-            writer.add_text("Early Stopping", f"Triggered at epoch {epoch + 1}", epoch + 1) 
+            writer.add_text("Early Stopping", f"Triggered at epoch {epoch + 1}", epoch + 1)
             print(f"[INFO] Early stopping triggered at epoch {epoch + 1}")
             break
 

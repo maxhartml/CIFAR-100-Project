@@ -94,7 +94,8 @@ if __name__ == "__main__":
     # Step 9: Evaluate the model
     print_separator()
     print("[INFO] Evaluating model on test data...")
-    compute_accuracy(model, testloader)
+    test_accuracy = compute_accuracy(model, testloader)
+    print("[INFO] Test Accuracy: {:.2f}%".format(test_accuracy))
     print("[INFO] Evaluation complete.")
 
     
