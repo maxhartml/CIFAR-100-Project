@@ -108,6 +108,6 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
             print(f"[INFO] Early stopping triggered at epoch {epoch + 1}")
             break
     
-    writer.close()
+    
     print("[INFO] Training complete.")
     return start_epoch + NUM_EPOCHS

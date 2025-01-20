@@ -80,7 +80,7 @@ def get_cifar100_loaders():
 
 
     # Call this on your trainloader
-    show_augmented_samples(trainloader)
+    # show_augmented_samples(trainloader)
     
     # ---------------------------------------------------
     # Return the DataLoaders and Class Labels

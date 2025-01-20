@@ -14,6 +14,7 @@ from training.save_load import load_latest_checkpoint, ensure_checkpoint_dir_exi
 from gui.image_classifier_gui import ImageClassifierGUI
 from configuration.config_1 import *
 from torch.utils.tensorboard import SummaryWriter
+import time
 
 
 # ---------------------------------------------------
@@ -28,7 +29,8 @@ def print_separator():
 # ---------------------------------------------------
 if __name__ == "__main__":
 
-    writer = SummaryWriter(log_dir=LOG_DIR)
+    run_name = f"run_{time.strftime('%Y%m%d-%H%M%S')}"
+    writer = SummaryWriter(log_dir=os.path.join(LOG_DIR, run_name))
 
     # Step 1: Program Start
     print_separator()
@@ -38,7 +40,7 @@ if __name__ == "__main__":
     # Step 2: Initialize the device
     print(f"[INFO] Using device: {DEVICE}")
 
-    # Step 3: Load the CIFAR-100 dataset
+    # step 3: Load the CIFAR-100 dataset
     print_separator()
     print("[INFO] Preparing CIFAR-100 dataset...")
     trainloader, valloader, testloader, classes = get_cifar100_loaders()
@@ -49,12 +51,12 @@ if __name__ == "__main__":
     print("[INFO] Initializing model...")
     # Uncomment the desired model initialization
     # Model 1: Custom CNN
-    # model = CNN().to(DEVICE)
+    model = CNN().to(DEVICE)
     # Model 2: Custom ResNet18
     # model = CustomResNet18().to(DEVICE)
     # Model 3: Pretrained ResNet18
-    model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).to(DEVICE)  # Use ResNet18 pretrained on ImageNet
-    model.fc = nn.Linear(model.fc.in_features, 100).to(DEVICE)  # Modify the final layer for CIFAR-100 Dataset
+    # model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).to(DEVICE)  # Use ResNet18 pretrained on ImageNet
+    # model.fc = nn.Linear(model.fc.in_features, 100).to(DEVICE)  # Modify the final layer for CIFAR-100 Dataset
     # Print the total number of parameters
     total_params = sum(p.numel() for p in model.parameters())
     # Print the name of the model
@@ -95,14 +97,17 @@ if __name__ == "__main__":
     evaluate_model(model, testloader, classes, writer, epoch)
     print("[INFO] Evaluation complete.")
 
-    if DEVICE == "cpu":
-        # Step 10: Launch the GUI
-        print_separator()
-        print("[INFO] Launching the GUI...")
-        root = tk.Tk()
-        app = ImageClassifierGUI(root, model, classes)
-        root.mainloop()
+    
+    # Step 10: Launch the GUI
+    # print_separator()
+    # print("[INFO] Launching the GUI...")
+    # root = tk.Tk()
+    # app = ImageClassifierGUI(root, model, classes)
+    # root.mainloop()
 
     # Step 11: Program End
-    print("[INFO] GUI session ended. Program complete.")
+    print_separator()
+    writer.close()
+    print("[INFO] Tensorboard writer closed.")
+    print("[INFO] Program complete.")
     print_separator()
