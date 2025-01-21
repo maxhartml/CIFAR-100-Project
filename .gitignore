@@ -21,3 +21,6 @@ data/
 logs/
 
 .DS_Store
+
+val_sample_images/
+train_sample_images/

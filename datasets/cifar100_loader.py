@@ -3,7 +3,7 @@ import torch
 from torchvision import transforms, datasets
 from torch.utils.data import DataLoader, random_split
 from configuration.config_1 import *
-from torchvision.utils import make_grid
+from torchvision.utils import make_grid, save_image
 import matplotlib.pyplot as plt
 
 def get_cifar100_loaders():
@@ -34,20 +34,10 @@ def get_cifar100_loaders():
         #transforms.RandomErasing(p=0.5, scale=(0.02, 0.2), ratio=(0.3,3.3)),     # Add random erasing
     ])
 
-
     test_transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(MEAN, STD)
     ])
-
-    def show_augmented_samples(loader, filename="augmented_samples.png"):
-        data_iter = iter(loader)
-        images, labels = next(data_iter)
-        grid = make_grid(images[:8], nrow=4, normalize=True, scale_each=True)
-        plt.imshow(grid.permute(1, 2, 0))
-        plt.axis('off')  # Optional: Remove axes for a cleaner image
-        plt.savefig(filename)  # Save the figure
-        print(f"Augmented samples saved to {filename}")
 
     # Get number of CPU cores
     num_workers =  NUM_WORKERS
@@ -78,11 +68,35 @@ def get_cifar100_loaders():
     # CIFAR-100 contains 100 classes, which can be retrieved as a list of strings.
     classes = full_trainset.classes
 
+    sample_images_from_loader(trainloader, output_dir="train_sample_images", num_samples=5, classes=classes)
+    sample_images_from_loader(valloader, output_dir="val_sample_images", num_samples=5, classes=classes)
 
-    # Call this on your trainloader
-    # show_augmented_samples(trainloader)
-    
     # ---------------------------------------------------
     # Return the DataLoaders and Class Labels
     # ---------------------------------------------------
     return trainloader, valloader, testloader, classes
+
+
+
+def sample_images_from_loader(loader, output_dir="sample_images", num_samples=5, classes=None):
+    """
+    Sample images from the DataLoader and save them to a specified directory.
+
+    Args:
+        loader (torch.utils.data.DataLoader): DataLoader to sample images from.
+        output_dir (str): Directory to save the sampled images.
+        num_samples (int): Number of images to sample.
+    """
+    os.makedirs(output_dir, exist_ok=True)  # Ensure the output directory exists
+
+    data_iter = iter(loader)
+    images, labels = next(data_iter)  # Get a batch of images and labels
+
+    for i in range(num_samples):
+        image = images[i]  # Get the i-th image
+        label = labels[i].item()  # Get the corresponding label
+
+        # Save the image with its class label in the filename
+        save_image(image, os.path.join(output_dir, f"image_{i}_label_{classes[label]}.png"))
+
+    print(f"[INFO] Saved {num_samples} images to '{output_dir}'.")
