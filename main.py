@@ -29,7 +29,7 @@ def print_separator():
 # ---------------------------------------------------
 if __name__ == "__main__":
 
-    run_name = f"run_{time.strftime('%Y%m%d-%H%M%S')}"
+    run_name = f"model_{time.strftime('%Y%m%d-%H%M%S')}"
     writer = SummaryWriter(log_dir=os.path.join(LOG_DIR, run_name))
 
     # Step 1: Program Start
@@ -108,8 +108,7 @@ if __name__ == "__main__":
     # Step 11: Save the final model
     print_separator()
     print("[INFO] Saving the final model...")
-    ensure_checkpoint_dir_exists(dir_path=DEPLOY_DIR)
-    torch.save(model.state_dict(), os.path.join(DEPLOY_DIR, f"{run_name}_model.pth"))
+    torch.save(model.state_dict(), os.path.join(CHECKPOINT_DIR, f"{run_name}.pth"))
 
     # Step 12: Program End
     print_separator()

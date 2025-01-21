@@ -5,7 +5,6 @@ import torch
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 DATA_DIR = "./data"
 CHECKPOINT_DIR = "./checkpoints"
-DEPLOY_DIR = "./deploy"
 LOG_DIR = "./logs"
 NUM_WORKERS = os.cpu_count() - 1  # Use all but one core
 
