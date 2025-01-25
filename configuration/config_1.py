@@ -2,6 +2,7 @@ import os
 import torch
 
 # General Configurations
+MODEL_NAME = "CustomResNet18"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 DATA_DIR = "./data"
 CHECKPOINT_DIR = "./checkpoints"

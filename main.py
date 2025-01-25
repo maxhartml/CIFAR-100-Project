@@ -3,11 +3,8 @@ import torch.optim as optim
 import torch.nn as nn
 from torch.optim.lr_scheduler import StepLR
 import tkinter as tk
-from torchvision.models import resnet18, ResNet18_Weights
-
-from models.custom_CNN import CNN
-from models.custom_ResNet import CustomResNet18
 from datasets.cifar100_loader import get_cifar100_loaders
+from models.initialise_model import initialize_model
 from training.train import train_model
 from metrics.comptute_accuracy import compute_accuracy
 from training.save_load import load_latest_checkpoint, ensure_checkpoint_dir_exists
@@ -15,7 +12,6 @@ from gui.image_classifier_gui import ImageClassifierGUI
 from configuration.config_1 import *
 from torch.utils.tensorboard import SummaryWriter
 import time
-
 
 # ---------------------------------------------------
 # Helper Functions
@@ -29,7 +25,7 @@ def print_separator():
 # ---------------------------------------------------
 if __name__ == "__main__":
 
-    run_name = f"model_{time.strftime('%Y%m%d-%H%M%S')}"
+    run_name = f"{MODEL_NAME}_{time.strftime('%Y%m%d-%H%M%S')}"
     writer = SummaryWriter(log_dir=os.path.join(LOG_DIR, run_name))
 
     # Step 1: Program Start
@@ -46,22 +42,10 @@ if __name__ == "__main__":
     trainloader, valloader, testloader, classes = get_cifar100_loaders()
     print(f"[INFO] Dataset loaded successfully. Number of classes: {len(classes)}")
 
-    # Step 4: Initialize the model
+    # step 4: Initialize the model
     print_separator()
     print("[INFO] Initializing model...")
-    # Uncomment the desired model initialization
-    # Model 1: Custom CNN
-    # model = CNN().to(DEVICE)
-    # Model 2: Custom ResNet18
-    model = CustomResNet18().to(DEVICE)
-    # Model 3: Pretrained ResNet18
-    # model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).to(DEVICE)  # Use ResNet18 pretrained on ImageNet
-    # model.fc = nn.Linear(model.fc.in_features, 100).to(DEVICE)  # Modify the final layer for CIFAR-100 Dataset
-    # Print the total number of parameters
-    total_params = sum(p.numel() for p in model.parameters())
-    # Print the name of the model
-    print(f"[INFO] Using Model: {model.__class__.__name__}")  # Prints the name of the model class
-    print(f"[INFO] Model initialized with {total_params:,} parameters.")
+    model = initialize_model(MODEL_NAME, DEVICE)
 
     # Step 5: Define loss function, optimizer, and learning rate scheduler
     print_separator()
