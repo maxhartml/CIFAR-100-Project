@@ -75,28 +75,30 @@ if __name__ == "__main__":
         writer=writer
     )
 
-    # Step 9: Evaluate the model
+    # Step 8: Evaluate the model
     print_separator()
     print("[INFO] Evaluating model on test data...")
     test_accuracy = compute_accuracy(model, testloader)
     print("[INFO] Test Accuracy: {:.2f}%".format(test_accuracy))
     print("[INFO] Evaluation complete.")
 
-    # Step 10: Launch the GUI
-    # print_separator()
-    # print("[INFO] Launching the GUI...")
-    # root = tk.Tk()
-    # app = ImageClassifierGUI(root, model, classes)
-    # root.mainloop()
-
-    # Step 11: Save the final model
+     # Step 9: Save the final model
     print_separator()
     print("[INFO] Saving the final model...")
     torch.save(model.state_dict(), os.path.join(CHECKPOINT_DIR, f"{run_name}.pth"))
-
-    # Step 12: Program End
-    print_separator()
+    print("[INFO] Model saved successfully.")
     writer.close()
     print("[INFO] Tensorboard writer closed.")
+    
+    # Step 10: Launch the GUI (optional based on configuration)
+    if USE_GUI:
+        print_separator()
+        print("[INFO] Launching the GUI...")
+        root = tk.Tk()
+        app = ImageClassifierGUI(root, model, classes)
+        root.mainloop()
+
+    # Step 11: Program End
+    print_separator()
     print("[INFO] Program complete.")
     print_separator()
