@@ -24,3 +24,5 @@ logs/
 
 val_sample_images/
 train_sample_images/
+
+/images

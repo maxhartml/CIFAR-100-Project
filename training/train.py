@@ -26,9 +26,11 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
 
     # Total number of batches in an epoch
     num_batches = len(trainloader)
+    total_steps = NUM_EPOCHS * num_batches
     print_every = max(1, num_batches // 2)  # Print progress 2 times per epoch
 
     # Training loop
+    step = 0  # Global step counter
     for epoch in range(start_epoch, start_epoch + NUM_EPOCHS):
         print(f"[INFO] Starting Epoch {epoch + 1}/{start_epoch + NUM_EPOCHS}...")
         running_loss = 0.0
@@ -58,10 +60,14 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
             loss.backward()
 
             # Gradient clipping
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0, norm_type=2.0)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=GRAD_CLIP, norm_type=2.0)
 
             # Optimisation step
             optimizer.step()
+
+            # Update the learning rate scheduler
+            scheduler.step()  # CosineAnnealingLR needs to step after every batch
+            step += 1  # Increment the global step
 
             # Accumulate loss for reporting
             running_loss += loss.item()
@@ -82,33 +88,27 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
                       f"Val Loss: {val_loss:.4f}, Images/sec: {images_per_second:.2f}")
 
                 # Log metrics to TensorBoard
-                writer.add_scalar("Loss/train", avg_train_loss, epoch * num_batches + i)
-                writer.add_scalar("Loss/validation", val_loss, epoch * num_batches + i)
-                writer.add_scalar("Learning Rate", current_lr, epoch * num_batches + i)
-                writer.add_scalar("Performance/images_per_sec", images_per_second, epoch * num_batches + i)
+                writer.add_scalar("Loss/train", avg_train_loss, step)
+                writer.add_scalar("Loss/validation", val_loss, step)
+                writer.add_scalar("Learning Rate", current_lr, step)
+                writer.add_scalar("Performance/images_per_sec", images_per_second, step)
 
                 running_loss = 0.0
 
-        # Step the learning rate scheduler
-        scheduler.step()
-
-        # Compute train and validation accuracy using the modularised function
+        # Compute train and validation accuracy
         train_accuracy = compute_accuracy(model, trainloader, num_classes=100)
         val_accuracy = compute_accuracy(model, valloader, num_classes=100)
 
         # Log accuracy metrics to TensorBoard
-        writer.add_scalar("Accuracy/train", train_accuracy, epoch * num_batches + i)
-        writer.add_scalar("Accuracy/validation", val_accuracy, epoch * num_batches + i)
+        writer.add_scalar("Accuracy/train", train_accuracy, epoch)
+        writer.add_scalar("Accuracy/validation", val_accuracy, epoch)
 
-        # Report the completion of the epoch
-        print(f"[INFO] Epoch {epoch + 1} completed. Time taken: {time.time() - start_time:.2f} seconds. Train Acc: {train_accuracy:.2f}%, Val Acc: {val_accuracy:.2f}%")
-
-        # Save a checkpoint if the interval is met and directory is provided
+        # Save a checkpoint
         if CHECKPOINT_DIR and (epoch + 1) % SAVE_INTERVAL == 0:
             checkpoint_path = os.path.join(CHECKPOINT_DIR, f"cifar100-checkpoint-{epoch + 1}.pth")
             save_checkpoint(model, optimizer, scheduler, epoch + 1, checkpoint_path)
 
-        # Early Stopping (use the validation loss already computed in the loop)
+        # Early Stopping
         early_stopping(val_loss)
         if early_stopping.early_stop:
             writer.add_text("Early Stopping", f"Triggered at epoch {epoch + 1}", epoch + 1)

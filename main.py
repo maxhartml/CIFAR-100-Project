@@ -12,6 +12,7 @@ from gui.image_classifier_gui import ImageClassifierGUI
 from configuration.config_1 import *
 from torch.utils.tensorboard import SummaryWriter
 import time
+from torch.optim.lr_scheduler import CosineAnnealingLR
 
 # ---------------------------------------------------
 # Helper Functions
@@ -52,7 +53,9 @@ if __name__ == "__main__":
     print("[INFO] Setting up training configuration...")
     criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
     optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
-    scheduler = StepLR(optimizer, step_size=SCHEDULER_STEP_SIZE, gamma=SCHEDULER_GAMMA)
+    total_steps = NUM_EPOCHS * len(trainloader)  # Total number of steps
+    scheduler = CosineAnnealingLR(optimizer, T_max=total_steps, eta_min=ETA_MIN)
+    print("[INFO] CosineAnnealingLR scheduler initialized.")
     print("[INFO] Training configuration complete.")
 
     # Step 6: Checkpoint management
