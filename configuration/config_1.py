@@ -19,10 +19,11 @@ AUGMENTATION_PADDING = 4  # Padding for data augmentation
 
 # Training Configurations
 NUM_EPOCHS = 150  # Number of training epochs
-LEARNING_RATE = 0.001  # Initial learning rate
+INITIAL_LEARNING_RATE = 0.001  # Initial learning rate
 ETA_MIN=1e-5  # Minimum learning rate for CosineAnnealingLR
 PATIENCE = 30  # Patience for early stopping
 SAVE_INTERVAL = 10  # Interval for saving checkpoints
 DROPOUT_RATE = 0.3  # Dropout rate for regularization
 WEIGHT_DECAY = 1e-3  # Weight decay for optimizer
 GRAD_CLIP = 2.0  # Gradient clipping value (can try 1 later)
+LABEL_SMOOTHING = 0.1  # Label smoothing factor

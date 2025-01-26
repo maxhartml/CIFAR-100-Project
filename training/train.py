@@ -1,12 +1,14 @@
 import os
+import torch
+import time
 from training.save_load import save_checkpoint
 from metrics.compute_validation_loss import compute_validation_loss
 from metrics.comptute_accuracy import compute_accuracy
 from training.early_stopping import EarlyStopping
 from configuration.config_1 import *
-import time
 
-def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, start_epoch, writer):
+
+def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, start_epoch, writer, save_dir):
     """
     Train the model on the given dataset for a specified number of epochs.
 
@@ -18,6 +20,8 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
         criterion (torch.nn.Module): The loss function to minimize.
         scheduler (torch.optim.lr_scheduler._LRScheduler): The learning rate scheduler.
         start_epoch (int): The starting epoch number (useful for resuming training).
+        writer (torch.utils.tensorboard.SummaryWriter): TensorBoard writer for logging.
+        save_dir (str): The directory where checkpoints and the final model will be saved.
 
     Returns:
         int: The epoch number after completing the training.
@@ -26,7 +30,6 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
 
     # Total number of batches in an epoch
     num_batches = len(trainloader)
-    total_steps = NUM_EPOCHS * num_batches
     print_every = max(1, num_batches // 2)  # Print progress 2 times per epoch
 
     # Training loop
@@ -99,7 +102,7 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
         train_accuracy = compute_accuracy(model, trainloader, num_classes=100)
         val_accuracy = compute_accuracy(model, valloader, num_classes=100)
 
-        #  Log accuracy metrics to console
+        # Log accuracy metrics to console
         print(f"[INFO] Epoch {epoch + 1} - "
               f"Train Accuracy: {train_accuracy:.2f}%, Validation Accuracy: {val_accuracy:.2f}%")
 
@@ -108,8 +111,8 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
         writer.add_scalar("Accuracy/validation", val_accuracy, epoch)
 
         # Save a checkpoint
-        if CHECKPOINT_DIR and (epoch + 1) % SAVE_INTERVAL == 0:
-            checkpoint_path = os.path.join(CHECKPOINT_DIR, f"cifar100-checkpoint-{epoch + 1}.pth")
+        if save_dir and (epoch + 1) % SAVE_INTERVAL == 0:
+            checkpoint_path = os.path.join(save_dir, f"checkpoint-epoch-{epoch + 1}.pth")
             save_checkpoint(model, optimizer, scheduler, epoch + 1, checkpoint_path)
 
         # Early Stopping
