@@ -99,6 +99,10 @@ def train_model(model, trainloader, valloader, optimizer, criterion, scheduler, 
         train_accuracy = compute_accuracy(model, trainloader, num_classes=100)
         val_accuracy = compute_accuracy(model, valloader, num_classes=100)
 
+        #  Log accuracy metrics to console
+        print(f"[INFO] Epoch {epoch + 1} - "
+              f"Train Accuracy: {train_accuracy:.2f}%, Validation Accuracy: {val_accuracy:.2f}%")
+
         # Log accuracy metrics to TensorBoard
         writer.add_scalar("Accuracy/train", train_accuracy, epoch)
         writer.add_scalar("Accuracy/validation", val_accuracy, epoch)

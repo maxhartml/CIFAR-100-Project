@@ -104,7 +104,7 @@ python main.py
 3. Monitor progress using TensorBoard:
 
 ```bash
-tensorboard --logdir ./logs
+tensorboard --logdir CIFAR100-ResNet/logs
 ```
 
 ### Key Features in Training:

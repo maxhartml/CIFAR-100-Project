@@ -66,9 +66,9 @@ def get_cifar100_loaders():
     classes = full_trainset.classes
 
     # Sample images for verification (optional)
-    sample_images_from_loader(trainloader, output_dir="images/train_sample", num_samples=5, classes=classes)
-    sample_images_from_loader(valloader, output_dir="images/val_sample", num_samples=5, classes=classes)
-    sample_images_from_loader(testloader, output_dir="images/test_sample", num_samples=5, classes=classes)
+    # sample_images_from_loader(trainloader, output_dir="images/train_sample", num_samples=5, classes=classes)
+    # sample_images_from_loader(valloader, output_dir="images/val_sample", num_samples=5, classes=classes)
+    # sample_images_from_loader(testloader, output_dir="images/test_sample", num_samples=5, classes=classes)
 
     # ---------------------------------------------------
     # Return the DataLoaders and Class Labels

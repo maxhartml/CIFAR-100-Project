@@ -56,7 +56,7 @@ def load_latest_checkpoint(model, optimizer, scheduler):
         int: The epoch value from the loaded checkpoint, or 0 if no checkpoint is found.
     """
     # Find all checkpoint files matching the naming pattern
-    checkpoint_files = glob(os.path.join(CHECKPOINT_DIR, "cifar100-checkpoint-*.pth"))
+    checkpoint_files = glob(os.path.join(CHECKPOINT_DIR, f"{MODEL_NAME}-checkpoint-*.pth"))
     if not checkpoint_files:
         print(f"[INFO] No checkpoint files found in {CHECKPOINT_DIR}. Starting from scratch.")
         return 0

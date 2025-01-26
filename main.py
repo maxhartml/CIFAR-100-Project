@@ -26,7 +26,7 @@ def print_separator():
 # ---------------------------------------------------
 if __name__ == "__main__":
 
-    run_name = f"{MODEL_NAME}_{time.strftime('%Y%m%d-%H%M%S')}"
+    run_name = f"{MODEL_NAME}-{time.strftime('%Y%m%d-%H%M%S')}"
     writer = SummaryWriter(log_dir=os.path.join(LOG_DIR, run_name))
 
     # Step 1: Program Start
